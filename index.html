@@ -8,8 +8,19 @@
   hospedada num domínio real (ex.: https://cdn.atmus.dev.br/player.html) — o
   iframe interno dela envia o referer desse domínio, que o YouTube aceita.
 
-  Uso: player.html?v=<id do vídeo (11 caracteres)>&start=<segundos>&autoplay=<0|1>&clean=<0|1>
+  Uso: player.html?v=<id do vídeo (11 caracteres)>&start=<segundos>&autoplay=<0|1>&clean=<0|1>&mute=<0|1>
   A URL hospedada é configurada em shared-side/shared.lua (PlayerUrl) de cada resource.
+
+  Legendas (cc_load_policy) ficam sempre desligadas — sem isso, vídeo com
+  legenda forçada pelo autor mostra o texto por cima mesmo sem o usuário pedir.
+
+  mute=1 é só pra quem usa esta página como TEXTURA visual muda (DUI da
+  screentv) — o som já sai por outro canal (NUI com volume por distância), e
+  sem mute a política de autoplay do Chromium bloqueia o autoplay sem gesto do
+  usuário, prendendo o player no aviso de "clique pra ativar o som" (o botão
+  de play/pause que não desaparece, já que a textura não recebe clique).
+  boombox/videoplayer usam este player como fonte de áudio de verdade e não
+  devem passar mute=1.
 
   clean=1 recarrega o vídeo parado assim que ele termina. Serve pra quem mostra o
   player pra uma pessoa olhando (o jornal da rede social): no fim do vídeo o Youtube
@@ -62,10 +73,12 @@
           rel: "0",
           modestbranding: "1",
           iv_load_policy: "3",
+          cc_load_policy: "0",
           playsinline: "1",
           enablejsapi: "1",
           origin: location.origin,
           start: String(parseInt(Start, 10) || 0),
+          mute: Mute ? "1" : "0",
         });
 
         if (Frame) {
@@ -94,6 +107,7 @@
 
       var Initial = new URLSearchParams(location.search);
       var Clean = Initial.get("clean") === "1";
+      var Mute = Initial.get("mute") === "1";
 
       LoadVideo(Initial.get("v"), Initial.get("start"), Initial.get("autoplay"));
 
